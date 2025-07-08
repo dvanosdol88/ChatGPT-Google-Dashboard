@@ -1,0 +1,181 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Styles */
+.App-header {
+  background-color: #282c34;
+  padding: 20px;
+  color: white;
+  text-align: center;
+}
+
+.App-header h1 {
+  margin: 0 0 16px 0;
+  font-size: 32px;
+}
+
+.service-status {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.connected {
+  background: #28a745;
+  color: white;
+}
+
+.status-badge.disconnected {
+  background: #dc3545;
+  color: white;
+}
+
+/* Navigation Styles */
+.app-nav {
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.nav-button {
+  padding: 16px 32px;
+  border: none;
+  background: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent;
+}
+
+.nav-button:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.nav-button.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+}
+
+/* Content Styles */
+.app-content {
+  flex: 1;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.tasks-section,
+.lists-section {
+  animation: fadeIn 0.3s ease;
+}
+
+.google-section {
+  text-align: center;
+  padding: 40px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  margin: 20px auto;
+  max-width: 600px;
+}
+
+.google-status {
+  margin-top: 20px;
+}
+
+.google-status .success {
+  color: #28a745;
+}
+
+.google-status .warning {
+  color: #ffc107;
+}
+
+/* Loading and Error States */
+.app-loading,
+.app-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+}
+
+.app-error button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.app-error button:hover {
+  background: #0056b3;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .App-header h1 {
+    font-size: 24px;
+  }
+
+  .service-status {
+    font-size: 11px;
+  }
+
+  .nav-button {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .app-content {
+    padding: 10px;
+  }
+}

@@ -1,0 +1,70 @@
+.task-list-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.task-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.filter-button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-button:hover {
+  background: #f5f5f5;
+}
+
+.filter-button.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.error {
+  text-align: center;
+  padding: 40px;
+  color: #dc3545;
+}
+
+.retry-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.retry-button:hover {
+  background: #c82333;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-style: italic;
+}
