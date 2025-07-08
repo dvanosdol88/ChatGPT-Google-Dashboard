@@ -30,8 +30,9 @@ services:
         sync: false
 
   # Frontend React App
-  - type: static
+  - type: web
     name: chatgpt-dashboard-frontend
+    runtime: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/build
     headers:
