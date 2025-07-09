@@ -1,17 +1,64 @@
 import styled from 'styled-components';
 
+// Dashboard Container
+export const DashboardContainer = styled.div`
+  background-color: #f5f7fa;
+  min-height: 100vh;
+`;
+
+// Dashboard Header
+export const DashboardHeader = styled.header`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+`;
+
+// Dashboard Title
+export const DashboardTitle = styled.h1`
+  font-size: 1.5em;
+  color: #0A1828;
+  margin: 0;
+  font-weight: 600;
+`;
+
+// ChatGPT Link
+export const ChatGPTLink = styled.a`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #004080, #0066cc);
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 64, 128, 0.3);
+  }
+  
+  img {
+    width: 24px;
+    height: 24px;
+  }
+`;
+
 // Dashboard Grid Layout
 export const DashboardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
-  padding: 20px;
-  background-color: #f5f7fa;
-  min-height: 100vh;
+  padding: 0 20px 20px 20px;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    padding: 10px;
+    padding: 0 10px 10px 10px;
     gap: 15px;
   }
 `;
