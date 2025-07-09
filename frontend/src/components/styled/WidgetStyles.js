@@ -29,23 +29,23 @@ export const DashboardTitle = styled.h1`
 export const ChatGPTLink = styled.a`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
   background: linear-gradient(135deg, #004080, #0066cc);
   color: white;
   text-decoration: none;
-  border-radius: 25px;
-  font-weight: 500;
+  border-radius: 50%;
   transition: all 0.3s ease;
   
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.05);
     box-shadow: 0 5px 15px rgba(0, 64, 128, 0.3);
   }
   
-  img {
-    width: 24px;
-    height: 24px;
+  svg {
+    width: 28px;
+    height: 28px;
   }
 `;
 
