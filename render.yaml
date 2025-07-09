@@ -33,7 +33,7 @@ services:
   - type: web
     name: chatgpt-dashboard-frontend
     runtime: static
-    buildCommand: cd frontend && npm install && npm run build
+    buildCommand: cd frontend && npm install && REACT_APP_API_URL=https://chatgpt-dashboard-backend.onrender.com/api npm run build
     staticPublishPath: ./frontend/build
     headers:
       - path: /*
