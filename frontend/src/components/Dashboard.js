@@ -11,6 +11,7 @@ import GmailWidget from './GmailWidget';
 import GoogleDriveWidget from './GoogleDriveWidget';
 import MyListsWidget from './MyListsWidget';
 import CalendarWidget from './CalendarWidget';
+import DocumentsWidget from './DocumentsWidget';
 
 function Dashboard({ healthStatus, refreshTasks, onTaskAdded }) {
   return (
@@ -44,6 +45,9 @@ function Dashboard({ healthStatus, refreshTasks, onTaskAdded }) {
         <MyListsWidget />
         <GoogleDriveWidget />
       </DashboardGrid>
+      <div style={{ marginTop: '24px' }}>
+        <DocumentsWidget />
+      </div>
     </DashboardContainer>
   );
 }

@@ -13,6 +13,7 @@ import taskRoutes from './routes/tasks.js';
 import listRoutes from './routes/lists.js';
 import aiRoutes from './routes/ai.js';
 import driveRoutes from './routes/drive.js';
+import documentsRoutes from './routes/documents.js';
 
 // ES modules fix for __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -64,6 +65,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/lists', listRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/google/drive', driveRoutes);
+app.use('/api/documents', documentsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ 
