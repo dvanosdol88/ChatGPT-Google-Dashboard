@@ -12,6 +12,7 @@ import { sequelize, syncDatabase } from './models/index.js';
 import taskRoutes from './routes/tasks.js';
 import listRoutes from './routes/lists.js';
 import aiRoutes from './routes/ai.js';
+import driveRoutes from './routes/drive.js';
 
 // ES modules fix for __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -62,6 +63,7 @@ if (process.env.GOOGLE_API_CREDENTIALS) {
 app.use('/api/tasks', taskRoutes);
 app.use('/api/lists', listRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/google/drive', driveRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ 

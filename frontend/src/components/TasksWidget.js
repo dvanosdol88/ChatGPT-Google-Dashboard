@@ -1,92 +1,51 @@
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { 
   Widget, 
   WidgetHeader, 
   WidgetTitle, 
   WidgetIcon, 
   WidgetContent,
-  ListItem,
-  StyledInput,
   ActionButton 
 } from './styled/WidgetStyles';
-import { taskAPI, aiAPI } from '../api/api';
+import axios from 'axios';
 
-function TasksWidget({ type, refreshTasks, onTaskAdded }) {
-  const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState('');
+function TasksWidget({ type }) {
+  const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
-  const [generatingAI, setGeneratingAI] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchTasks();
-  }, [refreshTasks]);
+    fetchTasksFromDrive();
+  }, [type]);
 
-  const fetchTasks = async () => {
+  const fetchTasksFromDrive = async () => {
     try {
-      const response = await taskAPI.getAll();
-      // Filter tasks based on type (you might want to add a 'type' field to your task model)
-      const filteredTasks = response.data.tasks || [];
-      setTasks(filteredTasks);
+      const endpoint = type === 'work' 
+        ? '/api/google/drive/work-tasks'
+        : '/api/google/drive/personal-tasks';
+      
+      const response = await axios.get(endpoint);
+      setContent(response.data);
+      setError(null);
     } catch (error) {
-      console.error('Error fetching tasks:', error);
+      console.error(`Error fetching ${type} tasks:`, error);
+      
+      // Fallback content if Drive is not configured
+      const fallbackContent = type === 'work' 
+        ? `# Work Tasks\n\n- Configure Google Drive integration\n- Set DRIVE_WORK_TASKS_FILE_ID in environment\n- Create a markdown file in Google Drive with your tasks`
+        : `# Personal Tasks\n\n- Configure Google Drive integration\n- Set DRIVE_PERSONAL_TASKS_FILE_ID in environment\n- Create a markdown file in Google Drive with your tasks`;
+      
+      setContent(fallbackContent);
+      setError('Using fallback content. Configure Google Drive to see real tasks.');
     } finally {
       setLoading(false);
     }
   };
 
-  const addTask = async () => {
-    if (newTask.trim()) {
-      try {
-        const response = await taskAPI.create({ 
-          title: newTask,
-          type: type // Add type field to distinguish work/personal
-        });
-        setTasks([...tasks, response.data.task]);
-        setNewTask('');
-        onTaskAdded(response.data.task);
-      } catch (error) {
-        console.error('Error adding task:', error);
-      }
-    }
-  };
-
-  const toggleTask = async (task) => {
-    try {
-      await taskAPI.toggle(task.id);
-      setTasks(tasks.map(t => 
-        t.id === task.id ? { ...t, status: t.status === 'completed' ? 'pending' : 'completed' } : t
-      ));
-    } catch (error) {
-      console.error('Error toggling task:', error);
-    }
-  };
-
-  const deleteTask = async (id) => {
-    try {
-      await taskAPI.delete(id);
-      setTasks(tasks.filter(t => t.id !== id));
-    } catch (error) {
-      console.error('Error deleting task:', error);
-    }
-  };
-
-  const generateAITask = async () => {
-    setGeneratingAI(true);
-    try {
-      const prompt = type === 'work' 
-        ? 'Generate a professional work task'
-        : 'Generate a personal development or lifestyle task';
-      
-      const response = await aiAPI.generateTask({ prompt, count: 1 });
-      if (response.data.tasks && response.data.tasks.length > 0) {
-        const aiTask = response.data.tasks[0];
-        setNewTask(aiTask);
-      }
-    } catch (error) {
-      console.error('Error generating AI task:', error);
-    } finally {
-      setGeneratingAI(false);
-    }
+  const openInDrive = () => {
+    window.open('https://drive.google.com', '_blank');
   };
 
   return (
@@ -96,100 +55,42 @@ function TasksWidget({ type, refreshTasks, onTaskAdded }) {
         <WidgetIcon>{type === 'work' ? '💼' : '🏃'}</WidgetIcon>
       </WidgetHeader>
       <WidgetContent>
-        <div style={{ marginBottom: '15px' }}>
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-            <StyledInput
-              type="text"
-              placeholder={`Add new ${type} task...`}
-              value={newTask}
-              onChange={(e) => setNewTask(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && addTask()}
-            />
-            <ActionButton 
-              onClick={generateAITask}
-              disabled={generatingAI}
-              style={{ width: 'auto', padding: '10px 15px' }}
-            >
-              {generatingAI ? '...' : '🤖'}
-            </ActionButton>
-          </div>
-          <ActionButton 
-            onClick={addTask} 
-            style={{ width: '100%' }}
-          >
-            Add Task
-          </ActionButton>
-        </div>
-        
         {loading ? (
           <p>Loading tasks...</p>
         ) : (
-          <div>
-            {tasks.filter(task => task.status === 'pending').map(task => (
-              <ListItem 
-                key={task.id}
-                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-              >
-                <span
-                  onClick={() => toggleTask(task)}
-                  style={{ flex: 1, cursor: 'pointer' }}
-                >
-                  {task.title}
-                </span>
-                <button
-                  onClick={() => deleteTask(task.id)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#dc3545',
-                    cursor: 'pointer',
-                    fontSize: '18px'
-                  }}
-                >
-                  ×
-                </button>
-              </ListItem>
-            ))}
+          <>
+            <div className="markdown-content" style={{
+              fontSize: '14px',
+              lineHeight: '1.6',
+              color: '#0A1828'
+            }}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {content}
+              </ReactMarkdown>
+            </div>
             
-            {tasks.filter(task => task.status === 'completed').length > 0 && (
-              <>
-                <div style={{ marginTop: '20px', marginBottom: '10px', fontSize: '0.9em', color: '#6c757d' }}>
-                  Completed
-                </div>
-                {tasks.filter(task => task.status === 'completed').map(task => (
-                  <ListItem 
-                    key={task.id}
-                    style={{ 
-                      opacity: 0.6,
-                      textDecoration: 'line-through',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <span
-                      onClick={() => toggleTask(task)}
-                      style={{ flex: 1, cursor: 'pointer' }}
-                    >
-                      {task.title}
-                    </span>
-                    <button
-                      onClick={() => deleteTask(task.id)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#dc3545',
-                        cursor: 'pointer',
-                        fontSize: '18px'
-                      }}
-                    >
-                      ×
-                    </button>
-                  </ListItem>
-                ))}
-              </>
+            {error && (
+              <div style={{ 
+                marginTop: '15px', 
+                padding: '10px', 
+                background: '#f8f9fa',
+                borderRadius: '8px',
+                fontSize: '12px',
+                color: '#6c757d'
+              }}>
+                {error}
+              </div>
             )}
-          </div>
+            
+            <div style={{ marginTop: '15px', textAlign: 'center' }}>
+              <ActionButton 
+                onClick={openInDrive}
+                style={{ fontSize: '13px', padding: '8px 16px' }}
+              >
+                Edit in Google Drive
+              </ActionButton>
+            </div>
+          </>
         )}
       </WidgetContent>
     </Widget>
