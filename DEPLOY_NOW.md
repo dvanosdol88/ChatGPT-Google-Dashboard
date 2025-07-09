@@ -4,7 +4,7 @@
 [Click here to create database](https://dashboard.render.com/new/database)
 
 **Settings:**
-- Name: `chatgpt-dashboard-db`
+- Name: `david-gpt-db-2025` (or add random numbers like `chatgpt-db-7483`)
 - Database: `chatgpt_dashboard`  
 - User: `chatgpt_dashboard_user`
 - Region: Oregon (US West)
@@ -18,7 +18,7 @@
 [Click here to create backend](https://dashboard.render.com/new/web-service?repo=https://github.com/dvanosdol88/ChatGPT-Google-Dashboard)
 
 **Settings:**
-- Name: `chatgpt-dashboard-backend`
+- Name: `david-gpt-backend-2025` (or add random numbers)
 - Region: Oregon (US West)
 - Branch: `main`
 - Root Directory: `backend`
@@ -35,7 +35,7 @@
 | PORT | `5000` |
 | NODE_ENV | `production` |
 
-**After creation:** Copy the backend URL (like `https://chatgpt-dashboard-backend-xxx.onrender.com`)
+**After creation:** Copy the backend URL (like `https://david-gpt-backend-2025-xxx.onrender.com`)
 
 ---
 
@@ -43,7 +43,7 @@
 [Click here to create frontend](https://dashboard.render.com/new/static-site?repo=https://github.com/dvanosdol88/ChatGPT-Google-Dashboard)
 
 **Settings:**
-- Name: `chatgpt-dashboard-frontend`
+- Name: `david-gpt-frontend-2025` (or add random numbers)
 - Branch: `main`
 - Root Directory: `frontend`
 - Build Command: `npm install && npm run build`
@@ -54,7 +54,7 @@
 1. Go to Environment tab
 2. Add variable:
    - Key: `REACT_APP_API_URL`
-   - Value: `https://chatgpt-dashboard-backend-xxx.onrender.com/api` (use YOUR backend URL)
+   - Value: `https://[YOUR-BACKEND-URL].onrender.com/api` (use the URL from Step 2)
 3. This will trigger a rebuild
 
 ---
