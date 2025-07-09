@@ -28,6 +28,20 @@ services:
         sync: false
       - key: GOOGLE_API_CREDENTIALS
         sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: GOOGLE_REFRESH_TOKEN
+        sync: false
+      - key: DRIVE_WORK_TASKS_FILE_ID
+        sync: false
+      - key: DRIVE_PERSONAL_TASKS_FILE_ID
+        sync: false
+      - key: DRIVE_SHOPPING_LIST_FILE_ID
+        sync: false
+      - key: DRIVE_READING_LIST_FILE_ID
+        sync: false
+      - key: DRIVE_PROJECTS_LIST_FILE_ID
+        sync: false
 
   # Frontend React App
   - type: web
