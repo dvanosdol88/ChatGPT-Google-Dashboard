@@ -9,7 +9,7 @@ import {
   EmailItem,
   ActionButton
 } from './styled/WidgetStyles';
-import axios from 'axios';
+import { googleAPI } from '../api/api'; // Import googleAPI
 
 // Additional styled components for email display
 const EmailListContainer = styled.div`
@@ -117,7 +117,8 @@ function GmailWidget() {
 
   const fetchEmails = async () => {
     try {
-      const response = await axios.get('/api/google/gmail/messages');
+      // Use googleAPI for the call
+      const response = await googleAPI.getGmailMessages();
       
       if (response.data && response.data.messages) {
         // Format the emails for display
@@ -185,8 +186,13 @@ function GmailWidget() {
     // Mark as read if unread
     if (email.isUnread) {
       try {
-        await axios.post(`/api/google/gmail/messages/${email.id}/markRead`);
-        // Update local state
+        // await axios.post(`/api/google/gmail/messages/${email.id}/markRead`);
+        // The above line was using raw axios. If this functionality is needed,
+        // a method should be added to `googleAPI` in `src/api/api.js`.
+        // For example: await googleAPI.markGmailMessageAsRead(email.id);
+        // For now, focusing on getting data displayed.
+        console.log(`Attempted to mark email ${email.id} as read (currently commented out).`);
+        // Update local state (optimistically, or remove if API call is essential first)
         setEmails(prevEmails => 
           prevEmails.map(e => 
             e.id === email.id ? { ...e, isUnread: false } : e

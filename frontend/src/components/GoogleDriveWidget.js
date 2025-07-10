@@ -8,7 +8,7 @@ import {
   WidgetContent,
   ActionButton
 } from './styled/WidgetStyles';
-import axios from 'axios';
+import { googleAPI } from '../api/api'; // Import googleAPI
 
 // Styled components for Drive files display
 const FilesList = styled.div`
@@ -144,7 +144,8 @@ function GoogleDriveWidget() {
 
   const fetchRecentFiles = async () => {
     try {
-      const response = await axios.get('/api/google/drive/recent-files');
+      // Use googleAPI for the call
+      const response = await googleAPI.getDriveFiles();
       
       if (response.data && response.data.files) {
         setFiles(response.data.files);
