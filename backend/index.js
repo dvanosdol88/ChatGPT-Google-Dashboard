@@ -15,6 +15,7 @@ import aiRoutes from './routes/ai.js';
 import driveRoutes from './routes/drive.js';
 import documentsRoutes from './routes/documents.js';
 import gmailRoutes from './routes/gmail.js';
+import debugRoutes from './routes/debug.js';
 
 // ES modules fix for __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -91,6 +92,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/google/drive', driveRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use('/api/google/gmail', gmailRoutes);
+app.use('/api/debug', debugRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ 
