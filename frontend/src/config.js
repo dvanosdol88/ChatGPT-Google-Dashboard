@@ -32,4 +32,4 @@ export const API_ENDPOINTS = {
   gmailMessages: '/google/gmail/messages',
   calendarEvents: '/google/calendar/events',
   uploadAnalyze: '/upload-analyze'
-};
+};// Force rebuild: Thu Jul 10 12:25:51 EDT 2025

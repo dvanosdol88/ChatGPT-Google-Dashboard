@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Dashboard API Test</h1>
+    <button onclick="testAPI()">Test Backend API</button>
+    <button onclick="testGmail()">Test Gmail API</button>
+    <button onclick="testDrive()">Test Drive API</button>
+    <pre id="output"></pre>
+
+    <script>
+        const API_URL = 'https://chatgpt-dashboard-backend.onrender.com/api';
+        const output = document.getElementById('output');
+
+        async function testAPI() {
+            try {
+                output.textContent = 'Testing backend health...\n';
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                output.textContent += JSON.stringify(data, null, 2);
+            } catch (error) {
+                output.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function testGmail() {
+            try {
+                output.textContent = 'Testing Gmail API...\n';
+                const response = await fetch(`${API_URL}/google/gmail/messages`);
+                const data = await response.json();
+                output.textContent += `Found ${data.messages?.length || 0} emails\n`;
+                output.textContent += JSON.stringify(data.messages?.[0] || data, null, 2);
+            } catch (error) {
+                output.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function testDrive() {
+            try {
+                output.textContent = 'Testing Drive API...\n';
+                const response = await fetch(`${API_URL}/google/drive/recent-files`);
+                const data = await response.json();
+                output.textContent += `Found ${data.files?.length || 0} files\n`;
+                output.textContent += JSON.stringify(data.files?.[0] || data, null, 2);
+            } catch (error) {
+                output.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
