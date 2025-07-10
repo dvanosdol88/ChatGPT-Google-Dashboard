@@ -22,51 +22,32 @@ function CalendarWidget() {
   const fetchCalendarEvents = async () => {
     try {
       const response = await googleAPI.getCalendarEvents();
-      // Mock data for now - replace with actual API response
-      const mockEvents = [
-        {
-          id: '1',
-          title: 'Team Standup',
-          time: '10:00 AM',
-          date: 'Today',
-          type: 'meeting',
-          color: '#4285f4'
-        },
-        {
-          id: '2',
-          title: 'Project Review',
-          time: '2:00 PM',
-          date: 'Today',
-          type: 'meeting',
-          color: '#ea4335'
-        },
-        {
-          id: '3',
-          title: 'Client Call',
-          time: '11:00 AM',
-          date: 'Tomorrow',
-          type: 'call',
-          color: '#34a853'
-        },
-        {
-          id: '4',
-          title: 'Code Review',
-          time: '3:00 PM',
-          date: 'Tomorrow',
-          type: 'task',
-          color: '#fbbc04'
-        }
-      ];
-      setEvents(response.data?.events || mockEvents);
+      
+      if (response.data && response.data.events) {
+        // Map API response to display format
+        const formattedEvents = response.data.events.map(event => ({
+          id: event.id,
+          title: event.summary,
+          time: event.startTime,
+          date: event.startDate,
+          type: event.attendees > 0 ? 'meeting' : 'task',
+          color: getEventColor(event.colorId),
+          isAllDay: event.isAllDay,
+          htmlLink: event.htmlLink
+        }));
+        setEvents(formattedEvents);
+      } else {
+        setEvents([]);
+      }
     } catch (error) {
       console.error('Error fetching calendar events:', error);
-      // Use mock data as fallback
+      // Show connection message
       setEvents([
         {
           id: '1',
-          title: 'Connect Google Calendar',
-          time: 'Configure API',
-          date: 'Settings',
+          title: 'Unable to load calendar',
+          time: 'Check Google Calendar permissions',
+          date: 'Error',
           type: 'info',
           color: '#6c757d'
         }
@@ -74,6 +55,24 @@ function CalendarWidget() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getEventColor = (colorId) => {
+    // Google Calendar color mapping
+    const colors = {
+      '1': '#7986cb', // Lavender
+      '2': '#33b679', // Sage
+      '3': '#8e24aa', // Purple
+      '4': '#e67c73', // Pink
+      '5': '#f6bf26', // Yellow
+      '6': '#f4511e', // Orange
+      '7': '#039be5', // Blue
+      '8': '#616161', // Gray
+      '9': '#3f51b5', // Bold Blue
+      '10': '#0b8043', // Bold Green
+      '11': '#d50000'  // Bold Red
+    };
+    return colors[colorId] || '#4285f4'; // Default Google Blue
   };
 
   const openGoogleCalendar = () => {
@@ -131,11 +130,13 @@ function CalendarWidget() {
                 events.map(event => (
                   <ListItem
                     key={event.id}
+                    onClick={() => event.htmlLink && window.open(event.htmlLink, '_blank')}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '12px',
-                      borderLeft: `3px solid ${event.color || '#004080'}`
+                      borderLeft: `3px solid ${event.color || '#004080'}`,
+                      cursor: event.htmlLink ? 'pointer' : 'default'
                     }}
                   >
                     <span style={{ fontSize: '18px' }}>
@@ -144,7 +145,7 @@ function CalendarWidget() {
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: '500' }}>{event.title}</div>
                       <div style={{ fontSize: '0.85em', color: '#6c757d' }}>
-                        {event.date} • {event.time}
+                        {event.date} • {event.isAllDay ? 'All day' : event.time}
                       </div>
                     </div>
                   </ListItem>

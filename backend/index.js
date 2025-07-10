@@ -16,6 +16,7 @@ import driveRoutes from './routes/drive.js';
 import documentsRoutes from './routes/documents.js';
 import gmailRoutes from './routes/gmail.js';
 import debugRoutes from './routes/debug.js';
+import calendarRoutes from './routes/calendar.js';
 
 // ES modules fix for __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -93,6 +94,7 @@ app.use('/api/google/drive', driveRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use('/api/google/gmail', gmailRoutes);
 app.use('/api/debug', debugRoutes);
+app.use('/api/google/calendar', calendarRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ 
