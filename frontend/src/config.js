@@ -33,7 +33,7 @@ export const API_ENDPOINTS = {
   analyzeImage: '/ai/analyze-image',
   
   // Google Services
-  driveFiles: '/google/drive/files',
+  driveFiles: '/google/drive/recent-files',
   gmailMessages: '/google/gmail/messages',
   calendarEvents: '/google/calendar/events',
   uploadAnalyze: '/upload-analyze'
