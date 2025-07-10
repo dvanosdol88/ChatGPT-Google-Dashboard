@@ -1,7 +1,7 @@
 // API Configuration
 export const API_BASE_URL = process.env.REACT_APP_API_URL || 
   (process.env.NODE_ENV === 'production' 
-    ? '/api'  // Uses same domain in production if REACT_APP_API_URL not set
+    ? 'https://chatgpt-dashboard-backend.onrender.com/api'  // Backend URL
     : 'http://localhost:5000/api');
 
 // API Endpoints
