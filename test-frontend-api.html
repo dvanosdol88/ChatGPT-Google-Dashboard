@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Frontend-Backend Connection Test</h1>
+    
+    <h2>Test 1: Direct Backend APIs</h2>
+    <button onclick="testBackendDirect()">Test Backend Directly</button>
+    <div id="backend-result"></div>
+
+    <h2>Test 2: Frontend Widget Simulation</h2>
+    <button onclick="testFrontendAPI()">Test Frontend API Client</button>
+    <div id="frontend-result"></div>
+
+    <h2>Test 3: Check Frontend Build</h2>
+    <button onclick="checkFrontendBuild()">Check Frontend Build</button>
+    <div id="build-result"></div>
+
+    <script>
+        // Backend URL
+        const BACKEND_URL = 'https://chatgpt-dashboard-backend.onrender.com/api';
+        
+        // Frontend simulation - mimicking what the React app should do
+        const API_BASE_URL = 'https://chatgpt-dashboard-backend.onrender.com/api';
+        
+        async function testBackendDirect() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.innerHTML = '<p>Testing backend APIs directly...</p>';
+            
+            try {
+                const healthResponse = await fetch(`${BACKEND_URL}/health`);
+                const healthData = await healthResponse.json();
+                
+                const gmailResponse = await fetch(`${BACKEND_URL}/google/gmail/messages`);
+                const gmailData = await gmailResponse.json();
+                
+                const driveResponse = await fetch(`${BACKEND_URL}/google/drive/recent-files`);
+                const driveData = await driveResponse.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <h3>✅ Backend APIs Working!</h3>
+                    <p><strong>Health:</strong> ${healthData.status}</p>
+                    <p><strong>Gmail:</strong> ${gmailData.messages?.length || 0} emails fetched</p>
+                    <p><strong>Drive:</strong> ${driveData.files?.length || 0} files fetched</p>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<h3>❌ Backend Error</h3><pre>${error.message}</pre>`;
+            }
+        }
+        
+        async function testFrontendAPI() {
+            const resultDiv = document.getElementById('frontend-result');
+            resultDiv.innerHTML = '<p>Testing frontend API configuration...</p>';
+            
+            try {
+                // Simulate axios client from frontend
+                const gmailEndpoint = '/google/gmail/messages';
+                const fullUrl = API_BASE_URL + gmailEndpoint;
+                
+                const response = await fetch(fullUrl);
+                const data = await response.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <h3>✅ Frontend API Configuration Correct!</h3>
+                    <p><strong>API Base URL:</strong> ${API_BASE_URL}</p>
+                    <p><strong>Full URL:</strong> ${fullUrl}</p>
+                    <p><strong>Response:</strong> ${data.messages?.length || 0} emails</p>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>❌ Frontend API Error</h3>
+                    <p>This is what's happening in your React app</p>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+        
+        async function checkFrontendBuild() {
+            const resultDiv = document.getElementById('build-result');
+            resultDiv.innerHTML = '<p>Checking frontend build...</p>';
+            
+            try {
+                const response = await fetch('https://chatgpt-dashboard-frontend.onrender.com/');
+                const html = await response.text();
+                
+                // Check if the HTML contains the API URL
+                const hasBackendURL = html.includes('chatgpt-dashboard-backend.onrender.com');
+                const hasOldAPIPath = html.includes('"/api/');
+                
+                resultDiv.className = hasBackendURL ? 'result success' : 'result error';
+                resultDiv.innerHTML = `
+                    <h3>${hasBackendURL ? '✅' : '❌'} Frontend Build Check</h3>
+                    <p><strong>Contains backend URL:</strong> ${hasBackendURL ? 'Yes' : 'No'}</p>
+                    <p><strong>Has old /api path:</strong> ${hasOldAPIPath ? 'Yes (Problem!)' : 'No'}</p>
+                    <p>If the frontend doesn't contain the backend URL, it needs to be rebuilt.</p>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<h3>❌ Build Check Error</h3><pre>${error.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>

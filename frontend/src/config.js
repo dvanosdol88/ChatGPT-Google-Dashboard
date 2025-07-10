@@ -4,6 +4,13 @@ export const API_BASE_URL = process.env.REACT_APP_API_URL ||
     ? 'https://chatgpt-dashboard-backend.onrender.com/api'  // Backend URL
     : 'http://localhost:5000/api');
 
+// Debug logging
+console.log('API Configuration:', {
+  REACT_APP_API_URL: process.env.REACT_APP_API_URL,
+  NODE_ENV: process.env.NODE_ENV,
+  API_BASE_URL: API_BASE_URL
+});
+
 // API Endpoints
 export const API_ENDPOINTS = {
   // Health

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify OAuth Setup</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>OAuth Configuration Verification</h1>
+    
+    <div class="section">
+        <h2>Step 1: Check Backend OAuth Status</h2>
+        <button onclick="checkOAuthStatus()">Check OAuth Configuration</button>
+        <div id="oauth-status"></div>
+    </div>
+
+    <div class="section">
+        <h2>Step 2: Test API Connection</h2>
+        <button onclick="testAPIHealth()">Test Backend Health</button>
+        <button onclick="testGmailAPI()">Test Gmail API</button>
+        <div id="api-results"></div>
+    </div>
+
+    <div class="section">
+        <h2>Step 3: Verify Environment Variables</h2>
+        <p class="info">Check these in your Render Dashboard:</p>
+        <ul>
+            <li><strong>GOOGLE_CLIENT_ID</strong> - Should match your OAuth Client ID</li>
+            <li><strong>GOOGLE_CLIENT_SECRET</strong> - Should match your OAuth Client Secret</li>
+            <li><strong>GOOGLE_REFRESH_TOKEN</strong> - <span class="error">This is critical!</span></li>
+            <li><strong>GOOGLE_REDIRECT_URI</strong> - Should be: https://dashboard.davidcfacfp.com/auth/google/callback</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Step 4: Get a New Refresh Token</h2>
+        <p>If you don't have a refresh token, you need to authorize your app:</p>
+        <ol>
+            <li>Go to <a href="https://developers.google.com/oauthplayground" target="_blank">OAuth 2.0 Playground</a></li>
+            <li>Click the gear icon (⚙️) and check "Use your own OAuth credentials"</li>
+            <li>Enter your Client ID and Client Secret</li>
+            <li>In Step 1, select these scopes:
+                <ul>
+                    <li>https://www.googleapis.com/auth/gmail.readonly</li>
+                    <li>https://www.googleapis.com/auth/gmail.modify</li>
+                    <li>https://www.googleapis.com/auth/drive.readonly</li>
+                    <li>https://www.googleapis.com/auth/calendar.readonly</li>
+                </ul>
+            </li>
+            <li>Click "Authorize APIs" and login with the Google account that owns the data</li>
+            <li>In Step 2, click "Exchange authorization code for tokens"</li>
+            <li>Copy the "Refresh token" and add it to Render as GOOGLE_REFRESH_TOKEN</li>
+        </ol>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://chatgpt-dashboard-backend.onrender.com/api';
+
+        async function checkOAuthStatus() {
+            const statusDiv = document.getElementById('oauth-status');
+            try {
+                statusDiv.innerHTML = '<p>Checking OAuth configuration...</p>';
+                const response = await fetch(`${BACKEND_URL}/debug/oauth-status`);
+                const data = await response.json();
+                
+                statusDiv.innerHTML = `
+                    <h3>OAuth Configuration:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    ${data.hasRefreshToken ? 
+                        '<p class="success">✓ Refresh token is configured</p>' : 
+                        '<p class="error">✗ No refresh token found - this is why APIs are failing!</p>'
+                    }
+                `;
+            } catch (error) {
+                statusDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testAPIHealth() {
+            const resultsDiv = document.getElementById('api-results');
+            try {
+                resultsDiv.innerHTML = '<p>Testing backend health...</p>';
+                const response = await fetch(`${BACKEND_URL}/health`);
+                const data = await response.json();
+                resultsDiv.innerHTML = `<h3>Backend Health:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testGmailAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            try {
+                resultsDiv.innerHTML = '<p>Testing Gmail API...</p>';
+                const response = await fetch(`${BACKEND_URL}/google/gmail/messages`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultsDiv.innerHTML = `
+                        <h3>Gmail API Test:</h3>
+                        <p class="success">✓ Successfully fetched ${data.messages?.length || 0} emails</p>
+                        <pre>${JSON.stringify(data.messages?.[0] || data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <h3>Gmail API Error:</h3>
+                        <pre class="error">${JSON.stringify(data, null, 2)}</pre>
+                        <p class="error">This usually means the refresh token is missing or invalid</p>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
