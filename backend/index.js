@@ -178,4 +178,4 @@ app.get('/api/google/calendar/events', async (req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});
+});// Force redeploy Thu Jul 10 13:50:20 EDT 2025
