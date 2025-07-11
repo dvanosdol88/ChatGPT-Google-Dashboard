@@ -105,7 +105,7 @@ app.get('/api/health', (req, res) => {
     services: {
       database: sequelize.connectionManager.pool ? 'connected' : 'disconnected',
       openai: process.env.OPENAI_API_KEY ? 'configured' : 'not configured',
-      google: process.env.GOOGLE_API_CREDENTIALS ? 'configured' : 'not configured'
+      google: (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN) ? 'configured' : 'not configured'
     }
   });
 });

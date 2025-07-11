@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Capture Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a73e8;
+            margin-bottom: 30px;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-list li:before {
+            content: "✅ ";
+            font-size: 18px;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #5f6368;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #e6f4ea;
+            color: #1e8e3e;
+        }
+        .status.error {
+            background: #fce8e6;
+            color: #d33b27;
+        }
+        .status.info {
+            background: #e8f0fe;
+            color: #1967d2;
+        }
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1557b0;
+        }
+        video, canvas {
+            max-width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📸 Camera Capture Feature Test</h1>
+        
+        <div class="status info">
+            <strong>Implementation Status:</strong> Camera capture feature has been successfully implemented!
+        </div>
+        
+        <h2>✨ Features Implemented:</h2>
+        <ul class="feature-list">
+            <li><strong>Camera Access:</strong> WebRTC getUserMedia API for camera capture</li>
+            <li><strong>Image Capture:</strong> Canvas-based image capture from video stream</li>
+            <li><strong>OCR Integration:</strong> Tesseract.js for text extraction</li>
+            <li><strong>Smart Folders:</strong> AI-powered folder suggestions based on document type</li>
+            <li><strong>Google Drive Upload:</strong> Direct upload to selected Drive folders</li>
+            <li><strong>Progress Tracking:</strong> Real-time upload progress indicators</li>
+            <li><strong>Responsive UI:</strong> Works on desktop and mobile devices</li>
+        </ul>
+        
+        <div class="test-section">
+            <h3>📱 Frontend Components:</h3>
+            <ul>
+                <li><code>CameraCapture.js</code> - Main camera capture component</li>
+                <li><code>CameraWidget.js</code> - Dashboard widget integration</li>
+                <li>Added to Dashboard grid layout</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔧 Backend APIs:</h3>
+            <ul>
+                <li><code>POST /api/capture/ocr</code> - Extract text from images</li>
+                <li><code>GET /api/capture/folders</code> - Get folder suggestions</li>
+                <li><code>POST /api/capture/upload</code> - Upload to Google Drive</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧪 Basic Camera Test:</h3>
+            <button onclick="testCamera()">Test Camera Access</button>
+            <div id="camera-test"></div>
+            <video id="test-video" style="display:none; width: 300px;" autoplay></video>
+        </div>
+        
+        <div class="test-section">
+            <h3>🚀 Deployment Steps:</h3>
+            <ol>
+                <li>Push changes to GitHub: <code>git push origin main</code></li>
+                <li>Backend will auto-deploy on Render</li>
+                <li>Frontend will auto-deploy on Render</li>
+                <li>Test on: <a href="https://chatgpt-dashboard-frontend.onrender.com" target="_blank">https://chatgpt-dashboard-frontend.onrender.com</a></li>
+            </ol>
+        </div>
+        
+        <div class="status success" style="margin-top: 30px;">
+            <strong>✅ Ready to Deploy!</strong><br>
+            The camera capture feature is complete and ready for testing in production.
+        </div>
+    </div>
+    
+    <script>
+        async function testCamera() {
+            const testDiv = document.getElementById('camera-test');
+            const video = document.getElementById('test-video');
+            
+            try {
+                testDiv.innerHTML = '<div class="status info">Requesting camera access...</div>';
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                
+                video.srcObject = stream;
+                video.style.display = 'block';
+                
+                testDiv.innerHTML = '<div class="status success">✅ Camera access successful! You should see the video feed below.</div>';
+                
+                // Stop after 5 seconds
+                setTimeout(() => {
+                    stream.getTracks().forEach(track => track.stop());
+                    video.style.display = 'none';
+                    testDiv.innerHTML += '<div class="status info">Camera test completed.</div>';
+                }, 5000);
+                
+            } catch (error) {
+                testDiv.innerHTML = `<div class="status error">❌ Camera access failed: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
