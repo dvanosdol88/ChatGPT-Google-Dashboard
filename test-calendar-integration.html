@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Calendar Integration</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 1000px; margin: 0 auto; }
+        .info { background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        .warning { background: #fff3cd; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #0066cc; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; max-height: 400px; overflow-y: auto; }
+        .event-item { padding: 10px; margin: 5px 0; background: #f8f9fa; border-left: 3px solid #4285f4; }
+        .spinner { display: inline-block; margin-left: 10px; }
+        .spinner:after {
+            content: '⏳';
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Google Calendar Integration Test</h1>
+    
+    <div class="info">
+        <h3>🗓️ Calendar Integration Status:</h3>
+        <ul>
+            <li>Backend route created at <code>/api/google/calendar/events</code></li>
+            <li>Frontend CalendarWidget updated to use real data</li>
+            <li>OAuth2 authentication using refresh token</li>
+            <li>Deployment pushed - wait 2-3 minutes for Render to rebuild</li>
+        </ul>
+    </div>
+    
+    <div class="test">
+        <h2>1. Backend Calendar API Test</h2>
+        <button onclick="testCalendarAPI()">Test Calendar API</button>
+        <button onclick="testTodayEvents()">Test Today's Events</button>
+        <div id="calendar-result"></div>
+    </div>
+
+    <div class="test">
+        <h2>2. Frontend Calendar Widget</h2>
+        <p>Once the backend is deployed, the Calendar widget should show:</p>
+        <ul>
+            <li>Next 7 days of events</li>
+            <li>Event titles, times, and dates</li>
+            <li>Color coding based on calendar colors</li>
+            <li>Click events to open in Google Calendar</li>
+        </ul>
+        <button onclick="openDashboard()">Open Dashboard</button>
+    </div>
+
+    <div class="test">
+        <h2>3. Permissions Check</h2>
+        <button onclick="checkPermissions()">Check Google Permissions</button>
+        <div id="permissions-result"></div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://chatgpt-dashboard-backend.onrender.com/api';
+        const FRONTEND_URL = 'https://chatgpt-dashboard-frontend.onrender.com';
+
+        async function testCalendarAPI() {
+            const resultDiv = document.getElementById('calendar-result');
+            resultDiv.innerHTML = '<span class="spinner"></span> Testing calendar API...';
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/google/calendar/events`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    resultDiv.className = 'error';
+                    resultDiv.innerHTML = `
+                        <h3>❌ Calendar API Error</h3>
+                        <p>${data.error}</p>
+                        <p>${data.details || ''}</p>
+                        <p><strong>Common fixes:</strong></p>
+                        <ul>
+                            <li>Ensure Calendar API is enabled in Google Cloud Console</li>
+                            <li>Verify OAuth scopes include calendar.readonly</li>
+                            <li>Check if refresh token has calendar permissions</li>
+                        </ul>
+                    `;
+                } else {
+                    resultDiv.className = 'success';
+                    resultDiv.innerHTML = `
+                        <h3>✅ Calendar API Working!</h3>
+                        <p>Found ${data.events?.length || 0} upcoming events</p>
+                        ${data.events && data.events.length > 0 ? `
+                            <div style="margin-top: 10px;">
+                                ${data.events.slice(0, 3).map(event => `
+                                    <div class="event-item">
+                                        <strong>${event.summary}</strong><br>
+                                        ${event.startDate} • ${event.isAllDay ? 'All day' : event.startTime}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        <details style="margin-top: 10px;">
+                            <summary>View Full Response</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = `<h3>❌ Connection Error</h3><p>${error.message}</p>`;
+            }
+        }
+
+        async function testTodayEvents() {
+            const resultDiv = document.getElementById('calendar-result');
+            resultDiv.innerHTML = '<span class="spinner"></span> Fetching today\'s events...';
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/google/calendar/events/today`);
+                const data = await response.json();
+                
+                resultDiv.className = 'success';
+                resultDiv.innerHTML = `
+                    <h3>📅 Today's Events</h3>
+                    <p>${data.count || 0} events today</p>
+                    ${data.events && data.events.length > 0 ? 
+                        data.events.map(event => `
+                            <div class="event-item">
+                                <strong>${event.summary}</strong><br>
+                                ${event.isAllDay ? 'All day event' : new Date(event.start).toLocaleTimeString()}
+                            </div>
+                        `).join('') : '<p>No events scheduled for today</p>'
+                    }
+                `;
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = `<h3>❌ Error</h3><p>${error.message}</p>`;
+            }
+        }
+
+        async function checkPermissions() {
+            const resultDiv = document.getElementById('permissions-result');
+            resultDiv.innerHTML = '<span class="spinner"></span> Checking permissions...';
+            
+            try {
+                // Check all Google APIs
+                const apis = ['gmail', 'drive', 'calendar'];
+                const results = await Promise.all(
+                    apis.map(async api => {
+                        try {
+                            const endpoint = api === 'drive' ? 'recent-files' : (api === 'gmail' ? 'messages' : 'events');
+                            const response = await fetch(`${BACKEND_URL}/google/${api}/${endpoint}`);
+                            return { api, status: response.status, ok: response.ok };
+                        } catch (err) {
+                            return { api, status: 'error', ok: false };
+                        }
+                    })
+                );
+                
+                resultDiv.className = 'warning';
+                resultDiv.innerHTML = `
+                    <h3>🔐 Google API Permissions Status</h3>
+                    ${results.map(r => `
+                        <p>
+                            ${r.ok ? '✅' : '❌'} ${r.api.toUpperCase()}: 
+                            ${r.ok ? 'Working' : `Error (${r.status})`}
+                        </p>
+                    `).join('')}
+                    ${!results.every(r => r.ok) ? `
+                        <p><strong>To enable Calendar access:</strong></p>
+                        <ol>
+                            <li>Go to <a href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank">Google Cloud Console</a></li>
+                            <li>Enable "Google Calendar API"</li>
+                            <li>May need to regenerate refresh token with calendar scope</li>
+                        </ol>
+                    ` : ''}
+                `;
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = `<h3>❌ Error</h3><p>${error.message}</p>`;
+            }
+        }
+
+        function openDashboard() {
+            window.open(FRONTEND_URL, '_blank');
+        }
+
+        // Auto-test on load
+        window.onload = () => {
+            console.log('Calendar Integration Test Page Loaded');
+            console.log('Backend URL:', BACKEND_URL);
+            console.log('Frontend URL:', FRONTEND_URL);
+        };
+    </script>
+</body>
+</html>

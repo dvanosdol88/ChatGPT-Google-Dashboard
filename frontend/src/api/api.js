@@ -106,6 +106,20 @@ export const googleAPI = {
         'Content-Type': 'multipart/form-data'
       }
     });
+  },
+  
+  // Camera capture endpoints
+  captureOCR: (data) => apiClient.post(API_ENDPOINTS.captureOCR, data),
+  
+  getCaptureFolders: (params) => apiClient.get(API_ENDPOINTS.captureFolders, { params }),
+  
+  uploadCapture: (formData, config = {}) => {
+    return apiClient.post(API_ENDPOINTS.captureUpload, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      ...config
+    });
   }
 };
 

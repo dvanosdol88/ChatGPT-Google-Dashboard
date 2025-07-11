@@ -36,5 +36,10 @@ export const API_ENDPOINTS = {
   driveFiles: '/google/drive/recent-files',
   gmailMessages: '/google/gmail/messages',
   calendarEvents: '/google/calendar/events',
-  uploadAnalyze: '/upload-analyze'
+  uploadAnalyze: '/upload-analyze',
+  
+  // Camera Capture
+  captureOCR: '/capture/ocr',
+  captureFolders: '/capture/folders',
+  captureUpload: '/capture/upload'
 };// Force rebuild: Thu Jul 10 12:25:51 EDT 2025
