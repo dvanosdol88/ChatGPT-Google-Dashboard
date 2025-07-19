@@ -187,4 +187,143 @@ router.get('/recent-files', async (req, res) => {
   }
 });
 
+// Search for lists file in Drive
+router.get('/lists-file', async (req, res) => {
+  try {
+    const oauth2Client = getOAuth2Client();
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
+    
+    // Search for dashboard-lists.json
+    const searchResponse = await drive.files.list({
+      q: "name='dashboard-lists.json' and trashed=false",
+      fields: 'files(id, name)',
+      spaces: 'drive'
+    });
+    
+    if (searchResponse.data.files.length === 0) {
+      // Create initial file if not exists
+      const fileMetadata = {
+        name: 'dashboard-lists.json',
+        mimeType: 'application/json'
+      };
+      
+      const initialData = {
+        lists: [
+          {
+            id: "work-todo",
+            name: "Work To Do",
+            icon: "💼",
+            items: [
+              { id: "w1", text: "Review quarterly reports", completed: false },
+              { id: "w2", text: "Team meeting prep", completed: false },
+              { id: "w3", text: "Update project timeline", completed: true }
+            ]
+          },
+          {
+            id: "personal-todo",
+            name: "Personal To Do",
+            icon: "🏠",
+            items: [
+              { id: "p1", text: "Schedule dentist appointment", completed: false },
+              { id: "p2", text: "Renew gym membership", completed: false }
+            ]
+          },
+          {
+            id: "groceries",
+            name: "Groceries",
+            icon: "🛒",
+            items: [
+              { id: "g1", text: "Milk", completed: false },
+              { id: "g2", text: "Bread", completed: false },
+              { id: "g3", text: "Eggs", completed: false },
+              { id: "g4", text: "Coffee", completed: false }
+            ]
+          },
+          {
+            id: "take-new-haven",
+            name: "Take to New Haven",
+            icon: "📦",
+            items: [
+              { id: "nh1", text: "Winter clothes", completed: false },
+              { id: "nh2", text: "Office supplies", completed: false }
+            ]
+          },
+          {
+            id: "take-ny",
+            name: "Take to NY",
+            icon: "🗽",
+            items: [
+              { id: "ny1", text: "Presentation materials", completed: false },
+              { id: "ny2", text: "Business cards", completed: false }
+            ]
+          }
+        ],
+        lastUpdated: new Date().toISOString()
+      };
+      
+      const media = {
+        mimeType: 'application/json',
+        body: JSON.stringify(initialData, null, 2)
+      };
+      
+      const createResponse = await drive.files.create({
+        requestBody: fileMetadata,
+        media: media,
+        fields: 'id'
+      });
+      
+      return res.json({ 
+        fileId: createResponse.data.id,
+        lists: initialData.lists 
+      });
+    }
+    
+    // Get file content
+    const fileId = searchResponse.data.files[0].id;
+    const fileResponse = await drive.files.get({
+      fileId: fileId,
+      alt: 'media'
+    });
+    
+    res.json({
+      fileId: fileId,
+      ...fileResponse.data
+    });
+    
+  } catch (error) {
+    console.error('Error accessing lists file:', error);
+    res.status(500).json({ error: 'Failed to access lists file' });
+  }
+});
+
+// Update lists file
+router.put('/lists-file', async (req, res) => {
+  try {
+    const oauth2Client = getOAuth2Client();
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
+    const { fileId, lists } = req.body;
+    
+    const updatedData = {
+      lists: lists,
+      lastUpdated: new Date().toISOString()
+    };
+    
+    const media = {
+      mimeType: 'application/json',
+      body: JSON.stringify(updatedData, null, 2)
+    };
+    
+    await drive.files.update({
+      fileId: fileId,
+      media: media
+    });
+    
+    res.json({ success: true, ...updatedData });
+    
+  } catch (error) {
+    console.error('Error updating lists:', error);
+    res.status(500).json({ error: 'Failed to update lists' });
+  }
+});
+
 export default router;

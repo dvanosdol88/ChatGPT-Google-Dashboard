@@ -9,7 +9,7 @@ import {
 import TasksWidget from './TasksWidget';
 import GmailWidget from './GmailWidget';
 import GoogleDriveWidget from './GoogleDriveWidget';
-import MyListsWidget from './MyListsWidget';
+import ListsManager from './ListsManager';
 import CalendarWidget from './CalendarWidget';
 import DocumentsWidget from './DocumentsWidget';
 import CameraWidget from './CameraWidget';
@@ -55,7 +55,9 @@ function Dashboard({ healthStatus, refreshTasks, onTaskAdded }) {
           refreshTasks={refreshTasks}
           onTaskAdded={onTaskAdded}
         />
-        <MyListsWidget />
+        <div style={{ gridColumn: 'span 2' }}>
+          <ListsManager />
+        </div>
         <GoogleDriveWidget />
         <CameraWidget />
       </DashboardGrid>
