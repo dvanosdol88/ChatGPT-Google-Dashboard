@@ -36,7 +36,9 @@ const corsOptions = {
       'http://localhost:3000',
       'https://chatgpt-dashboard-frontend.onrender.com',
       'https://dashboard.davidcfacfp.com',
-      'http://dashboard.davidcfacfp.com'
+      'http://dashboard.davidcfacfp.com',
+      'https://dashboard.dvo88.com',
+      'http://dashboard.dvo88.com'
     ];
     
     // Allow requests with no origin (like mobile apps or curl requests)
