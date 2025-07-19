@@ -43,3 +43,4 @@ export const API_ENDPOINTS = {
   captureFolders: '/capture/folders',
   captureUpload: '/capture/upload'
 };// Force rebuild: Thu Jul 10 12:25:51 EDT 2025
+// Force rebuild: Sat Jul 19 13:41:45 EDT 2025
