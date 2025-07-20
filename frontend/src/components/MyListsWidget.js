@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { 
   ListsWidget,
   WidgetHeader, 
@@ -12,38 +10,82 @@ import {
 import axios from 'axios';
 
 function MyListsWidget() {
-  const [content, setContent] = useState('');
-  const [selectedList, setSelectedList] = useState('shopping');
+  const [lists, setLists] = useState([]);
+  const [selectedList, setSelectedList] = useState(null);
+  const [newItemText, setNewItemText] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Available lists - you can expand this
-  const availableLists = [
-    { id: 'shopping', name: 'Shopping List', icon: '🛒' },
-    { id: 'reading', name: 'Reading List', icon: '📚' },
-    { id: 'projects', name: 'Projects', icon: '🚀' }
-  ];
+  const [isCreatingList, setIsCreatingList] = useState(false);
+  const [newListName, setNewListName] = useState('');
 
   useEffect(() => {
-    fetchListFromDrive();
-  }, [selectedList]);
+    fetchLists();
+  }, []);
 
-  const fetchListFromDrive = async () => {
+  const fetchLists = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`/api/google/drive/lists/${selectedList}`);
-      setContent(response.data);
+      const response = await axios.get('/api/lists');
+      if (response.data.success) {
+        setLists(response.data.data || []);
+        // Select first list if available
+        if (response.data.data && response.data.data.length > 0 && !selectedList) {
+          setSelectedList(response.data.data[0]);
+        }
+      }
       setError(null);
     } catch (error) {
-      console.error(`Error fetching ${selectedList} list:`, error);
-      
-      // Fallback content
-      const fallbackContent = `# ${availableLists.find(l => l.id === selectedList)?.name || 'List'}\n\n- Configure Google Drive integration\n- Set DRIVE_${selectedList.toUpperCase()}_LIST_FILE_ID in environment\n- Create a markdown file in Google Drive with your list items`;
-      
-      setContent(fallbackContent);
-      setError('Using fallback content. Configure Google Drive to see real lists.');
+      console.error('Error fetching lists:', error);
+      setError('Failed to load lists');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const createList = async () => {
+    if (!newListName.trim()) return;
+    
+    try {
+      const response = await axios.post('/api/lists', { 
+        name: newListName,
+        description: ''
+      });
+      if (response.data.success) {
+        await fetchLists();
+        setNewListName('');
+        setIsCreatingList(false);
+      }
+    } catch (error) {
+      console.error('Error creating list:', error);
+    }
+  };
+
+  const addItem = async () => {
+    if (!newItemText.trim() || !selectedList) return;
+    
+    try {
+      const response = await axios.post(`/api/lists/${selectedList.id}/items`, {
+        content: newItemText
+      });
+      if (response.data.success) {
+        await fetchLists();
+        setNewItemText('');
+      }
+    } catch (error) {
+      console.error('Error adding item:', error);
+    }
+  };
+
+  const toggleItem = async (itemId, checked) => {
+    if (!selectedList) return;
+    
+    try {
+      await axios.put(`/api/lists/${selectedList.id}/items/${itemId}`, {
+        checked: !checked
+      });
+      await fetchLists();
+    } catch (error) {
+      console.error('Error toggling item:', error);
     }
   };
 
@@ -58,65 +100,157 @@ function MyListsWidget() {
         <WidgetIcon>📝</WidgetIcon>
       </WidgetHeader>
       <WidgetContent>
-        {/* List selector */}
-        <div style={{ marginBottom: '15px' }}>
-          <select
-            value={selectedList}
-            onChange={(e) => setSelectedList(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px',
-              borderRadius: '8px',
-              border: '1px solid rgba(0, 64, 128, 0.2)',
-              fontSize: '14px',
-              background: 'white',
-              cursor: 'pointer'
-            }}
-          >
-            {availableLists.map(list => (
-              <option key={list.id} value={list.id}>
-                {list.icon} {list.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Content */}
         {loading ? (
-          <p>Loading list...</p>
+          <p>Loading lists...</p>
         ) : (
           <>
-            <div className="markdown-content" style={{
-              fontSize: '14px',
-              lineHeight: '1.6',
-              color: '#0A1828',
-              maxHeight: '300px',
-              overflowY: 'auto'
-            }}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {content}
-              </ReactMarkdown>
+            {/* List selector or create new */}
+            <div style={{ marginBottom: '15px' }}>
+              {isCreatingList ? (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="text"
+                    value={newListName}
+                    onChange={(e) => setNewListName(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && createList()}
+                    placeholder="New list name..."
+                    style={{
+                      flex: 1,
+                      padding: '8px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(0, 64, 128, 0.2)',
+                      fontSize: '14px'
+                    }}
+                    autoFocus
+                  />
+                  <button onClick={createList} style={{ padding: '8px 12px', borderRadius: '8px', border: 'none', background: '#007bff', color: 'white', cursor: 'pointer' }}>✓</button>
+                  <button onClick={() => { setIsCreatingList(false); setNewListName(''); }} style={{ padding: '8px 12px', borderRadius: '8px', border: 'none', background: '#6c757d', color: 'white', cursor: 'pointer' }}>✕</button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <select
+                    value={selectedList?.id || ''}
+                    onChange={(e) => {
+                      const list = lists.find(l => l.id === e.target.value);
+                      setSelectedList(list);
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '8px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(0, 64, 128, 0.2)',
+                      fontSize: '14px',
+                      background: 'white',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {lists.length === 0 && <option value="">No lists yet</option>}
+                    {lists.map(list => (
+                      <option key={list.id} value={list.id}>
+                        {list.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button 
+                    onClick={() => setIsCreatingList(true)} 
+                    style={{ padding: '8px 12px', borderRadius: '8px', border: 'none', background: '#28a745', color: 'white', cursor: 'pointer' }}
+                    title="Create new list"
+                  >
+                    +
+                  </button>
+                </div>
+              )}
             </div>
-            
+
+            {/* List items */}
+            {selectedList && (
+              <>
+                <div style={{
+                  fontSize: '14px',
+                  lineHeight: '1.8',
+                  color: '#0A1828',
+                  maxHeight: '250px',
+                  overflowY: 'auto',
+                  marginBottom: '10px'
+                }}>
+                  {selectedList.ListItems && selectedList.ListItems.length > 0 ? (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                      {selectedList.ListItems.map(item => (
+                        <li key={item.id} style={{ display: 'flex', alignItems: 'center', padding: '4px 0' }}>
+                          <input
+                            type="checkbox"
+                            checked={item.checked}
+                            onChange={() => toggleItem(item.id, item.checked)}
+                            style={{ marginRight: '8px', cursor: 'pointer' }}
+                          />
+                          <span style={{ 
+                            flex: 1,
+                            textDecoration: item.checked ? 'line-through' : 'none',
+                            color: item.checked ? '#6c757d' : '#0A1828'
+                          }}>
+                            {item.content}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p style={{ color: '#6c757d', fontStyle: 'italic' }}>No items yet</p>
+                  )}
+                </div>
+
+                {/* Add new item */}
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                  <input
+                    type="text"
+                    value={newItemText}
+                    onChange={(e) => setNewItemText(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addItem()}
+                    placeholder="Add item..."
+                    style={{
+                      flex: 1,
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      border: '1px solid rgba(0, 64, 128, 0.2)',
+                      fontSize: '13px'
+                    }}
+                  />
+                  <button 
+                    onClick={addItem}
+                    style={{ 
+                      padding: '6px 12px', 
+                      borderRadius: '6px', 
+                      border: 'none', 
+                      background: '#007bff', 
+                      color: 'white', 
+                      cursor: 'pointer',
+                      fontSize: '13px'
+                    }}
+                  >
+                    Add
+                  </button>
+                </div>
+              </>
+            )}
+
             {error && (
               <div style={{ 
-                marginTop: '15px', 
-                padding: '10px', 
-                background: '#f8f9fa',
-                borderRadius: '8px',
+                marginTop: '10px', 
+                padding: '8px', 
+                background: '#f8d7da',
+                borderRadius: '6px',
                 fontSize: '12px',
-                color: '#6c757d'
+                color: '#721c24'
               }}>
                 {error}
               </div>
             )}
             
-            <div style={{ marginTop: '15px', textAlign: 'center' }}>
+            <div style={{ textAlign: 'center' }}>
               <ActionButton 
                 onClick={openInDrive}
-                style={{ fontSize: '13px', padding: '8px 16px' }}
+                style={{ fontSize: '12px', padding: '6px 14px' }}
               >
-                Edit in Google Drive
+                View in Google Drive
               </ActionButton>
             </div>
           </>
