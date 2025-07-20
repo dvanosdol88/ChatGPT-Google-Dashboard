@@ -18,7 +18,7 @@ function Dashboard({ healthStatus, refreshTasks, onTaskAdded }) {
           </h1>
           <a 
             href="https://chat.openai.com" 
-            target="_blank" 
+            target="_blank"
             rel="noopener noreferrer"
             title="Open ChatGPT"
             className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"

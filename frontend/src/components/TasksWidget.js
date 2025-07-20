@@ -78,7 +78,7 @@ function TasksWidget({ type }) {
 
             {error && (
               <div 
-                role="alert" 
+                role="alert"
                 className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/30 rounded-lg text-xs text-yellow-700 dark:text-yellow-300"
               >
                 {error}
@@ -93,7 +93,7 @@ function TasksWidget({ type }) {
                   px-4 py-2 bg-blue-600 text-white text-sm font-semibold 
                   rounded-md shadow-sm transition-all duration-200
                   hover:bg-blue-700 hover:shadow-md
-                  focus:outline-none focus:ring-2 focus:ring-offset-2 
+                  focus:outline-none focus:ring-2 focus:ring-offset-2
                   focus:ring-blue-500 dark:focus:ring-offset-gray-800
                 "
               >
