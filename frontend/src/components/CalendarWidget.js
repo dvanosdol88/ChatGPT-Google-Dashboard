@@ -1,13 +1,12 @@
+// Enhanced CalendarWidget Component
+// Changes:
+// - Replaced all styled-components with Tailwind CSS classes for a modern, consistent UI.
+// - Added full dark mode support (`dark:*` classes).
+// - Implemented accessibility best practices (semantic HTML, ARIA roles, focus rings).
+// - Used dynamic inline styles for event-specific color coding, while keeping all other styling in Tailwind.
+// - Added smooth transitions for hover and focus states.
+
 import React, { useState, useEffect } from 'react';
-import { 
-  CalendarWidget as StyledWidget,
-  WidgetHeader, 
-  WidgetTitle, 
-  WidgetIcon, 
-  WidgetContent,
-  ListItem,
-  ActionButton
-} from './styled/WidgetStyles';
 import { googleAPI } from '../api/api';
 
 function CalendarWidget() {
@@ -95,76 +94,91 @@ function CalendarWidget() {
   };
 
   return (
-    <StyledWidget>
-      <WidgetHeader>
-        <WidgetTitle>Calendar</WidgetTitle>
-        <WidgetIcon>📅</WidgetIcon>
-      </WidgetHeader>
-      <WidgetContent>
+    <section 
+      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6 h-full flex flex-col transition-shadow duration-200 hover:shadow-lg border border-gray-200 dark:border-gray-700" 
+      aria-labelledby="calendar-widget-title"
+    >
+      <header className="flex items-center justify-between">
+        <h2 id="calendar-widget-title" className="text-lg font-bold text-gray-900 dark:text-gray-100">
+          Calendar
+        </h2>
+        <span className="text-2xl" role="img" aria-label="Calendar icon">📅</span>
+      </header>
+
+      <div className="mt-4 flex-grow flex flex-col">
         {loading ? (
-          <p>Loading events...</p>
+          <p role="status" className="text-gray-500 dark:text-gray-400 animate-pulse">
+            Loading events...
+          </p>
         ) : (
           <>
-            <div style={{ 
-              padding: '12px', 
-              background: 'rgba(0, 64, 128, 0.05)',
-              borderRadius: '8px',
-              marginBottom: '15px',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '0.9em', color: '#6c757d' }}>
+            {/* Current Date Display */}
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg mb-4 text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 {formatDate(currentDate)}
-              </div>
+              </p>
             </div>
 
-            <div style={{ marginBottom: '15px' }}>
-              <h4 style={{ fontSize: '0.95em', marginBottom: '10px', color: '#0A1828' }}>
+            {/* Events Section */}
+            <div className="flex-grow">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                 Upcoming Events
-              </h4>
+              </h3>
               
               {events.length === 0 ? (
-                <p style={{ color: '#6c757d', textAlign: 'center', padding: '20px' }}>
+                <p className="text-gray-500 dark:text-gray-400 text-center py-8">
                   No upcoming events
                 </p>
               ) : (
-                events.map(event => (
-                  <ListItem
-                    key={event.id}
-                    onClick={() => event.htmlLink && window.open(event.htmlLink, '_blank')}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      borderLeft: `3px solid ${event.color || '#004080'}`,
-                      cursor: event.htmlLink ? 'pointer' : 'default'
-                    }}
-                  >
-                    <span style={{ fontSize: '18px' }}>
-                      {getEventIcon(event.type)}
-                    </span>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: '500' }}>{event.title}</div>
-                      <div style={{ fontSize: '0.85em', color: '#6c757d' }}>
-                        {event.date} • {event.isAllDay ? 'All day' : event.time}
+                <div className="space-y-2 overflow-y-auto max-h-64 -mr-3 pr-3">
+                  {events.map((event) => (
+                    <div
+                      key={event.id}
+                      className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      style={{ borderLeft: `3px solid ${event.color || '#4285f4'}` }}
+                      onClick={() => event.htmlLink && window.open(event.htmlLink, '_blank')}
+                      tabIndex="0"
+                      onKeyPress={(e) => e.key === 'Enter' && event.htmlLink && window.open(event.htmlLink, '_blank')}
+                      role="button"
+                      aria-label={`View event: ${event.title}. ${event.date} at ${event.isAllDay ? 'All day' : event.time}`}
+                    >
+                      <span className="text-lg" role="img" aria-label={`${event.type} event`}>
+                        {getEventIcon(event.type)}
+                      </span>
+                      <div className="flex-grow">
+                        <p className="font-medium text-sm text-gray-800 dark:text-gray-100">
+                          {event.title}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {event.date} • {event.isAllDay ? 'All day' : event.time}
+                        </p>
                       </div>
                     </div>
-                  </ListItem>
-                ))
+                  ))}
+                </div>
               )}
             </div>
 
-            <div style={{ textAlign: 'center' }}>
-              <ActionButton 
+            {/* Action Button */}
+            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-center">
+              <button
                 onClick={openGoogleCalendar}
-                style={{ fontSize: '13px', padding: '8px 16px' }}
+                aria-label="View full calendar in Google Calendar"
+                className="
+                  px-4 py-2 bg-blue-600 text-white text-sm font-semibold 
+                  rounded-md shadow-sm transition-all duration-200
+                  hover:bg-blue-700 hover:shadow-md
+                  focus:outline-none focus:ring-2 focus:ring-offset-2 
+                  focus:ring-blue-500 dark:focus:ring-offset-gray-800
+                "
               >
                 View Full Calendar
-              </ActionButton>
+              </button>
             </div>
           </>
         )}
-      </WidgetContent>
-    </StyledWidget>
+      </div>
+    </section>
   );
 }
 

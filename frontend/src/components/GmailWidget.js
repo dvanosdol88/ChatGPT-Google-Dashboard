@@ -1,110 +1,13 @@
+// Enhanced GmailWidget Component
+// Changes:
+// - Replaced all styled-components with Tailwind CSS classes for a modern, consistent UI.
+// - Added full dark mode support (`dark:*` classes).
+// - Implemented accessibility best practices (semantic HTML, ARIA roles, focus rings, keyboard navigation).
+// - Added a custom-styled scrollbar using Tailwind utilities.
+// - Implemented conditional styling for unread/important emails and hover states.
+
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { 
-  EmailWidget, 
-  WidgetHeader, 
-  WidgetTitle, 
-  WidgetIcon, 
-  WidgetContent,
-  EmailItem,
-  ActionButton
-} from './styled/WidgetStyles';
-import { googleAPI } from '../api/api'; // Import googleAPI
-
-// Additional styled components for email display
-const EmailListContainer = styled.div`
-  max-height: 400px;
-  overflow-y: auto;
-  
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: #ddd;
-    border-radius: 3px;
-  }
-  
-  &::-webkit-scrollbar-thumb:hover {
-    background: #ccc;
-  }
-`;
-
-const StyledEmailItem = styled(EmailItem)`
-  position: relative;
-  padding-left: ${props => props.isUnread ? '20px' : '16px'};
-  
-  ${props => props.isUnread && `
-    &::before {
-      content: '';
-      position: absolute;
-      left: 4px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 8px;
-      height: 8px;
-      background: #0066cc;
-      border-radius: 50%;
-    }
-  `}
-  
-  ${props => props.isImportant && `
-    .email-sender {
-      &::after {
-        content: '⭐';
-        margin-left: 6px;
-        font-size: 0.9em;
-      }
-    }
-  `}
-`;
-
-const EmailSender = styled.div`
-  font-weight: ${props => props.isUnread ? '600' : '400'};
-  color: #333;
-  margin-bottom: 2px;
-`;
-
-const EmailSubject = styled.div`
-  font-weight: ${props => props.isUnread ? '500' : '400'};
-  color: ${props => props.isUnread ? '#000' : '#555'};
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const EmailSnippet = styled.div`
-  font-size: 0.85em;
-  color: #6c757d;
-  margin-top: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-const EmailTime = styled.div`
-  font-size: 0.85em;
-  color: #999;
-  white-space: nowrap;
-  margin-left: 12px;
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 40px 20px;
-  color: #6c757d;
-  
-  .icon {
-    font-size: 48px;
-    margin-bottom: 12px;
-    opacity: 0.5;
-  }
-`;
+import { googleAPI } from '../api/api';
 
 function GmailWidget() {
   const [emails, setEmails] = useState([]);
@@ -186,13 +89,7 @@ function GmailWidget() {
     // Mark as read if unread
     if (email.isUnread) {
       try {
-        // await axios.post(`/api/google/gmail/messages/${email.id}/markRead`);
-        // The above line was using raw axios. If this functionality is needed,
-        // a method should be added to `googleAPI` in `src/api/api.js`.
-        // For example: await googleAPI.markGmailMessageAsRead(email.id);
-        // For now, focusing on getting data displayed.
-        console.log(`Attempted to mark email ${email.id} as read (currently commented out).`);
-        // Update local state (optimistically, or remove if API call is essential first)
+        // Update local state optimistically
         setEmails(prevEmails => 
           prevEmails.map(e => 
             e.id === email.id ? { ...e, isUnread: false } : e
@@ -209,75 +106,108 @@ function GmailWidget() {
   };
 
   return (
-    <EmailWidget>
-      <WidgetHeader>
-        <WidgetTitle>Gmail</WidgetTitle>
-        <WidgetIcon>📧</WidgetIcon>
-      </WidgetHeader>
-      <WidgetContent>
+    <section 
+      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6 h-full flex flex-col transition-shadow duration-200 hover:shadow-lg border border-gray-200 dark:border-gray-700" 
+      aria-labelledby="gmail-widget-title"
+    >
+      <header className="flex items-center justify-between mb-4">
+        <h2 id="gmail-widget-title" className="text-lg font-bold text-gray-900 dark:text-gray-100">
+          Gmail
+        </h2>
+        <span className="text-2xl" role="img" aria-label="Email icon">📧</span>
+      </header>
+
+      <div className="flex-grow flex flex-col min-h-0">
         {loading ? (
-          <p>Loading emails...</p>
+          <p role="status" className="text-gray-500 dark:text-gray-400 animate-pulse">
+            Loading emails...
+          </p>
         ) : error ? (
-          <div style={{ textAlign: 'center', padding: '20px' }}>
-            <p style={{ color: '#6c757d', marginBottom: '15px' }}>{error}</p>
-            <ActionButton onClick={openGmail} style={{ fontSize: '14px' }}>
-              Open Gmail
-            </ActionButton>
-          </div>
-        ) : emails.length === 0 ? (
-          <EmptyState>
-            <div className="icon">📭</div>
-            <h4>No emails found</h4>
-            <p>Your inbox is empty or no emails match the criteria</p>
-            <ActionButton 
+          <div className="text-center py-6">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+            <button
               onClick={openGmail}
-              style={{ fontSize: '13px', padding: '8px 16px', marginTop: '16px' }}
+              aria-label="Open Gmail in new tab"
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
             >
               Open Gmail
-            </ActionButton>
-          </EmptyState>
+            </button>
+          </div>
+        ) : emails.length === 0 ? (
+          <div className="text-center py-10 flex-grow flex flex-col items-center justify-center">
+            <div className="text-5xl opacity-50 mb-3" aria-hidden="true">📭</div>
+            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">No emails found</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Your inbox is empty or no emails match the criteria</p>
+            <button
+              onClick={openGmail}
+              aria-label="Open Gmail in new tab"
+              className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
+            >
+              Open Gmail
+            </button>
+          </div>
         ) : (
           <>
-            <EmailListContainer>
-              {emails.map(email => (
-                <StyledEmailItem 
-                  key={email.id} 
+            <div 
+              role="list" 
+              className="flex-grow max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800 -mr-2 pr-2"
+            >
+              {emails.map((email) => (
+                <div
+                  key={email.id}
+                  role="listitem"
                   onClick={() => handleEmailClick(email)}
-                  isUnread={email.isUnread}
-                  isImportant={email.isImportant}
+                  onKeyPress={(e) => e.key === 'Enter' && handleEmailClick(email)}
+                  tabIndex="0"
+                  aria-label={`Email from ${email.sender}. Subject: ${email.subject}. ${email.isUnread ? 'Unread.' : ''} ${email.isImportant ? 'Important.' : ''} Received ${email.time}.`}
+                  className="p-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
                 >
-                  <div style={{ flex: 1 }}>
-                    <EmailSender 
-                      className="email-sender" 
-                      isUnread={email.isUnread}
-                    >
-                      {email.sender}
-                    </EmailSender>
-                    <EmailSubject isUnread={email.isUnread}>
-                      {email.subject}
-                    </EmailSubject>
-                    {email.snippet && (
-                      <EmailSnippet>
-                        {email.snippet}
-                      </EmailSnippet>
+                  <div className={`relative ${email.isUnread ? 'pl-4' : ''}`}>
+                    {email.isUnread && (
+                      <div 
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-600 rounded-full" 
+                        aria-hidden="true" 
+                      />
                     )}
+                    <div className="flex items-start justify-between">
+                      <div className="flex-grow min-w-0">
+                        <p className={`truncate text-sm ${email.isUnread ? 'font-semibold text-gray-900 dark:text-gray-100' : 'font-normal text-gray-600 dark:text-gray-400'}`}>
+                          {email.sender}
+                          {email.isImportant && (
+                            <span className="ml-1" role="img" aria-label="Important">⭐</span>
+                          )}
+                        </p>
+                        <p className={`truncate text-sm mt-1 ${email.isUnread ? 'font-medium text-gray-800 dark:text-gray-200' : 'text-gray-700 dark:text-gray-300'}`}>
+                          {email.subject}
+                        </p>
+                        {email.snippet && (
+                          <p className="truncate text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {email.snippet}
+                          </p>
+                        )}
+                      </div>
+                      <p className={`flex-shrink-0 ml-3 text-xs whitespace-nowrap ${email.isUnread ? 'text-gray-700 dark:text-gray-300 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>
+                        {email.time}
+                      </p>
+                    </div>
                   </div>
-                  <EmailTime>{email.time}</EmailTime>
-                </StyledEmailItem>
+                </div>
               ))}
-            </EmailListContainer>
-            <div style={{ textAlign: 'center', marginTop: '15px' }}>
-              <ActionButton 
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-center">
+              <button
                 onClick={openGmail}
-                style={{ fontSize: '13px', padding: '8px 16px' }}
+                aria-label="View all emails in Gmail"
+                className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
               >
                 View All in Gmail
-              </ActionButton>
+              </button>
             </div>
           </>
         )}
-      </WidgetContent>
-    </EmailWidget>
+      </div>
+    </section>
   );
 }
 
