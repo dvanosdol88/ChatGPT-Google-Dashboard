@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider } from 'styled-components';
-import { GlobalStyles } from './styles/GlobalStyles';
-import { theme } from './styles/theme';
 import Dashboard from './components/Dashboard';
 import { healthCheck } from './api/api';
 import './App.css';
@@ -56,14 +53,11 @@ function App() {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <GlobalStyles />
-      <Dashboard 
-        healthStatus={healthStatus}
-        refreshTasks={refreshTasks}
-        onTaskAdded={handleTaskAdded}
-      />
-    </ThemeProvider>
+    <Dashboard
+      healthStatus={healthStatus}
+      refreshTasks={refreshTasks}
+      onTaskAdded={handleTaskAdded}
+    />
   );
 }
 
