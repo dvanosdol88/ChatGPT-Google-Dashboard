@@ -8,8 +8,7 @@
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
     "react-scripts": "5.0.1",
-    "remark-gfm": "^4.0.1",
-    "styled-components": "^6.1.8"
+    "remark-gfm": "^4.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
